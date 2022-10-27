@@ -1,5 +1,5 @@
 #include <iostream>
 
 int main(int, char**) {
-    std::cout << "zdarovaep qq, world!\n";
+    std::cout << "zdarovap qq, world!\n";
 }
