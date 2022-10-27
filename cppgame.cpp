@@ -1,5 +1,5 @@
 #include <iostream>
 
 int main(int, char**) {
-    std::cout << "zdarovmp qq, world!\n";
+    std::cout << "get reade, world!\n";
 }
