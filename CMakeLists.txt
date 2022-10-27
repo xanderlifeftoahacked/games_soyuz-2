@@ -6,7 +6,7 @@ set(CMAKE_TOOLCHAIN_FILE /home/umarnurmatov/vcpkg/scripts/buildsystems/vcpkg.cma
 endif(UNIX)
 
 if(WIN32)
-set(CMAKE_TOOLCHAIN_FILE C:\vcp\vcpkg\scripts\buildsystems\vcpkg.cmake
+set(CMAKE_TOOLCHAIN_FILE C:/vcp/vcpkg/scripts/buildsystems/vcpkg.cmake
   CACHE STRING "Vcpkg toolchain file")
 endif(WIN32)
 
