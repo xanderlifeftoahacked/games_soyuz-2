@@ -1,7 +1,7 @@
 #include "SFML/Graphics.hpp"
 
 #define WINDOWS_W 800
-#define WINDOWS_H 601
+#define WINDOWS_H 603
 
 
 int main()
