@@ -19,6 +19,8 @@ int deltaThrust = 1;
 
 std::string resPath(std::string p) { return std::string(RESOURSE_PATH + p); }
 
+
+
 int selectThrustFrame(float thrust)
 {
     if(thrust == 0) return 0;
@@ -39,6 +41,15 @@ void selectRectFrame(int thrustFrame, int rotationFrame, sf::Sprite &sprite)
     burnTypeCounter++;
 }
 
+void showThrust(float thrust_len, sf::Text &playerTextThrust){
+
+    int f = thrust_len/4;
+    sf::String text = "Thrust force: ";
+    sf::String out = text + std::to_string(f);
+    playerTextThrust.setString(out);
+
+}
+
 int main()
 {
     sf::ContextSettings settings;
@@ -47,6 +58,15 @@ int main()
     window.setVerticalSyncEnabled(true);
     window.setFramerateLimit(60);
 
+    //Ставим шрифт
+    sf::Font font;
+    font.loadFromFile(resPath("pixls.ttf"));
+
+    //Создаем текст для игрока
+    sf::Text playerTextThrust;
+    playerTextThrust.setFont(font);
+    playerTextThrust.setCharacterSize(15);
+    playerTextThrust.setPosition(sf::Vector2f(100.f,100.f));
 
     // Спрайт ракет
     sf::Texture texture;
@@ -71,14 +91,15 @@ int main()
     float angle_acceleration = 10;
     float angle = 0;
 
-    sf::View view = window.getDefaultView();
+    sf::View view = window.getDefaultView(); view.zoom(2);
     sf::Clock deltaClock;
     sf::Event event;
     
     unsigned int rotationFrame = 0;
 
     while (window.isOpen())
-    {
+    {   
+        //setzoom
         // Declare and load a texture
 
         // Draw it
@@ -147,6 +168,7 @@ int main()
         sprite.setRotation(angle);
         sprite.move(velocity.x * dt + accelretion.x * pow(dt, 2) / 2, -(velocity.y * dt + accelretion.y * pow(dt, 2) / 2));
         view.move(velocity.x * dt + accelretion.x * pow(dt, 2) / 2, -(velocity.y * dt + accelretion.y * pow(dt, 2) / 2));
+        playerTextThrust.move(velocity.x * dt + accelretion.x * pow(dt, 2) / 2, -(velocity.y * dt + accelretion.y * pow(dt, 2) / 2));
         window.setView(view);
 
 
@@ -155,9 +177,10 @@ int main()
         std::cout << "vel " << velocity.x << " " << velocity.y << std::endl;
         std::cout << angle << " " << angle_velocity << " " <<angle_acceleration << std::endl  <<std::endl;
 
-
+        showThrust(thrust_len, playerTextThrust);
 
         window.clear(sf::Color::Black);
+        window.draw(playerTextThrust);
         window.draw(sprite);
         window.display();
     }

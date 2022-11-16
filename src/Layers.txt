@@ -1,0 +1,49 @@
+public class Layer : Drawable
+    {
+        private string name;
+        private List<Drawable> list;
+        private View view;
+
+        public Layer(string name, View copyView)
+        {
+            this.name = name;
+            list = new List<Drawable>();
+            view = new View(copyView);
+        }
+
+        public void Add(Drawable drawable) { list.Add(drawable); }
+
+        public void Remove(Drawable drawable) { list.Remove(drawable); }
+
+        public void Draw(RenderTarget target, RenderStates states)
+        {
+            target.SetView(view);
+            for (int i = 0; i < list.Count; i++)
+                target.Draw(list[i], states);
+        }
+
+        public void SetPosition(float x, float y)
+        {
+            var offset = new Vector2f(view.Center.X - x, view.Center.Y - y);
+            view.Move(offset);
+        }
+
+        public void SetPosition(Vector2f position)
+        {
+            var offset = view.Center - position;
+            view.Move(offset);
+        }
+
+        public void Move(Vector2f offset)
+        {
+            SetPosition(view.Center + offset);
+        }
+
+        public View GetView() { return view; }
+
+        public string Name
+        {
+            get { return name; }
+            set { name = value; }
+        }
+    }
