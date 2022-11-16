@@ -2,12 +2,13 @@
 // зародившийся в умах двух школьников школы "Интеллектуал", существовавшей в 2022 году
 
 #include "SFML/Graphics.hpp"
+#include <SFML/Audio.hpp>
+#include <SFML/System.hpp>
 #include <string>
 #include <iostream>
 #include <cmath>
 #include <gsl/gsl_linalg.h>
 #include <imgui.h>
-#include <SFML/Audio.hpp>
 #include <imgui-SFML.h>
 
 
