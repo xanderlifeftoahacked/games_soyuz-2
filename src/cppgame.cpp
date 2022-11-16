@@ -116,10 +116,9 @@ int main()
     float angle_acceleration = 10;
     float angle = 0;
 
-    sf::View view = window.getDefaultView(); view.zoom(2);
+    sf::View view = window.getDefaultView();
     sf::Clock deltaClock;
     sf::Clock deltaClockImgui;
-    sf::Event event;
     float dt;
 
     
@@ -130,8 +129,10 @@ int main()
         //setzoom
         // Declare and load a texture
         // Draw it
+        sf::Event event;
         while (window.pollEvent(event))
         {
+            ImGui::SFML::ProcessEvent(event);
             if (event.type == sf::Event::Closed)
                 window.close();
             else if (event.type == sf::Event::Resized) {
@@ -154,11 +155,6 @@ int main()
 
         dt = deltaClock.restart().asSeconds();
         ImGui::SFML::Update(window, deltaClockImgui.restart());
-
-        ImGui::Begin("Info");
-        ImGui::Text("asdfasdf");
-        ImGui::InputFloat("thrust", &thrust_len);
-        ImGui::End();
         
 
         // Обработка нажатий клавиатуры
@@ -212,11 +208,13 @@ int main()
         std::cout << angle << " " << angle_velocity << " " <<angle_acceleration << std::endl  <<std::endl;
 
         //showThrust(thrust_len, playerTextThrust);
-
-
         
+        ImGui::Begin("Info");
+        ImGui::Text("asdfasdf");
+        ImGui::InputFloat("thrust", &thrust_len);
+        ImGui::End();
+
         window.clear(sf::Color::Black);
-        
         //window.draw(playerTextThrust);
         window.draw(sprite);
         ImGui::SFML::Render(window);
