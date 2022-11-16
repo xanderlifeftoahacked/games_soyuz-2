@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
 if(UNIX)
-set(CMAKE_TOOLCHAIN_FILE /home/umarnurmatov/vcpkg/scripts/buildsystems/vcpkg.cmake
+set(CMAKE_TOOLCHAIN_FILE /home/xander/vcpkg/scripts/buildsystems/vcpkg.cmake
   CACHE STRING "Vcpkg toolchain file")
 endif(UNIX)
 

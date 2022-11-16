@@ -15,9 +15,6 @@
 #define FONT_SIZE 22.f
 #define ROUNDING 5.f
 #define BORDER 1.5f
-
-#define DEBUG true
-
 #define WINDOWS_W 800
 #define WINDOWS_H 600
 #define RECTX 50
@@ -79,16 +76,6 @@ int main()
 
     setupImgui();
 
-    // //Ставим шрифт
-    // sf::Font font;
-    // font.loadFromFile(resPath("pixls.ttf"));
-
-    // //Создаем текст для игрока
-    // sf::Text playerTextThrust;
-    // playerTextThrust.setFont(font);
-    // playerTextThrust.setCharacterSize(15);
-    // playerTextThrust.setPosition(sf::Vector2f(100.f,100.f));
-
     // Спрайт ракет
     sf::Texture texture;
     texture.loadFromFile(resPath("sprites/RocketV01.png"));
@@ -126,9 +113,6 @@ int main()
 
     while (window.isOpen())
     {   
-        //setzoom
-        // Declare and load a texture
-        // Draw it
         sf::Event event;
         while (window.pollEvent(event))
         {
@@ -198,7 +182,6 @@ int main()
         sprite.setRotation(angle);
         sprite.move(velocity.x * dt + accelretion.x * pow(dt, 2) / 2, -(velocity.y * dt + accelretion.y * pow(dt, 2) / 2));
         //view.move(velocity.x * dt + accelretion.x * pow(dt, 2) / 2, -(velocity.y * dt + accelretion.y * pow(dt, 2) / 2));
-        //playerTextThrust.move(velocity.x * dt + accelretion.x * pow(dt, 2) / 2, -(velocity.y * dt + accelretion.y * pow(dt, 2) / 2));
         window.setView(view);
 
 
@@ -207,7 +190,6 @@ int main()
         std::cout << "vel " << velocity.x << " " << velocity.y << std::endl;
         std::cout << angle << " " << angle_velocity << " " <<angle_acceleration << std::endl  <<std::endl;
 
-        //showThrust(thrust_len, playerTextThrust);
         
         ImGui::Begin("Info");
         ImGui::Text("asdfasdf");
