@@ -6,6 +6,13 @@
 #include <iostream>
 #include <cmath>
 #include <gsl/gsl_linalg.h>
+#include <imgui.h>
+#include <imgui-SFML.h>
+
+
+#define FONT_SIZE 22.f
+#define ROUNDING 5.f
+#define BORDER 1.5f
 
 #define DEBUG true
 
@@ -19,6 +26,20 @@ int deltaThrust = 1;
 
 std::string resPath(std::string p) { return std::string(RESOURSE_PATH + p); }
 
+
+void setupImgui()
+{
+    ImGuiIO& io = ImGui::GetIO();
+    io.Fonts->AddFontFromFileTTF(resPath("pixls.ttf").c_str(), FONT_SIZE);
+    ImGui::SFML::UpdateFontTexture();
+
+    ImGuiStyle* style = &ImGui::GetStyle();
+    style->WindowRounding = ROUNDING;
+    style->FrameRounding = ROUNDING;
+    style->PopupRounding = ROUNDING;
+    style->WindowBorderSize = BORDER;
+    style->FrameBorderSize = BORDER;
+}
 
 
 int selectThrustFrame(float thrust)
@@ -55,18 +76,22 @@ int main()
     sf::ContextSettings settings;
     //settings.antialiasingLevel = 2;
     sf::RenderWindow window(sf::VideoMode(WINDOWS_W, WINDOWS_H), "Simulation", sf::Style::Default, settings);
+    ImGui::SFML::Init(window, false);
     window.setVerticalSyncEnabled(true);
     window.setFramerateLimit(60);
+    
 
-    //Ставим шрифт
-    sf::Font font;
-    font.loadFromFile(resPath("pixls.ttf"));
+    setupImgui();
 
-    //Создаем текст для игрока
-    sf::Text playerTextThrust;
-    playerTextThrust.setFont(font);
-    playerTextThrust.setCharacterSize(15);
-    playerTextThrust.setPosition(sf::Vector2f(100.f,100.f));
+    // //Ставим шрифт
+    // sf::Font font;
+    // font.loadFromFile(resPath("pixls.ttf"));
+
+    // //Создаем текст для игрока
+    // sf::Text playerTextThrust;
+    // playerTextThrust.setFont(font);
+    // playerTextThrust.setCharacterSize(15);
+    // playerTextThrust.setPosition(sf::Vector2f(100.f,100.f));
 
     // Спрайт ракет
     sf::Texture texture;
@@ -75,7 +100,7 @@ int main()
     sprite.setTexture(texture);
     sprite.setTextureRect(sf::IntRect(0, 0, RECTX, RECTY));
     sprite.setOrigin(RECTX/2, RECTY/2);
-    sprite.scale(sf::Vector2f(0.5, 0.5));
+    //sprite.scale(sf::Vector2f(0.5, 0.5));
     sprite.setPosition(window.getSize().x/2, window.getSize().y/2);
 
 
@@ -93,7 +118,10 @@ int main()
 
     sf::View view = window.getDefaultView(); view.zoom(2);
     sf::Clock deltaClock;
+    sf::Clock deltaClockImgui;
     sf::Event event;
+    float dt;
+
     
     unsigned int rotationFrame = 0;
 
@@ -101,7 +129,6 @@ int main()
     {   
         //setzoom
         // Declare and load a texture
-
         // Draw it
         while (window.pollEvent(event))
         {
@@ -125,7 +152,14 @@ int main()
             }
         }
 
-        float dt = deltaClock.restart().asSeconds();
+        dt = deltaClock.restart().asSeconds();
+        ImGui::SFML::Update(window, deltaClockImgui.restart());
+
+        ImGui::Begin("Info");
+        ImGui::Text("asdfasdf");
+        ImGui::InputFloat("thrust", &thrust_len);
+        ImGui::End();
+        
 
         // Обработка нажатий клавиатуры
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)) if(thrust_len < MAX_THRUST) thrust_len += deltaThrust;
@@ -167,8 +201,8 @@ int main()
 
         sprite.setRotation(angle);
         sprite.move(velocity.x * dt + accelretion.x * pow(dt, 2) / 2, -(velocity.y * dt + accelretion.y * pow(dt, 2) / 2));
-        view.move(velocity.x * dt + accelretion.x * pow(dt, 2) / 2, -(velocity.y * dt + accelretion.y * pow(dt, 2) / 2));
-        playerTextThrust.move(velocity.x * dt + accelretion.x * pow(dt, 2) / 2, -(velocity.y * dt + accelretion.y * pow(dt, 2) / 2));
+        //view.move(velocity.x * dt + accelretion.x * pow(dt, 2) / 2, -(velocity.y * dt + accelretion.y * pow(dt, 2) / 2));
+        //playerTextThrust.move(velocity.x * dt + accelretion.x * pow(dt, 2) / 2, -(velocity.y * dt + accelretion.y * pow(dt, 2) / 2));
         window.setView(view);
 
 
@@ -177,13 +211,18 @@ int main()
         std::cout << "vel " << velocity.x << " " << velocity.y << std::endl;
         std::cout << angle << " " << angle_velocity << " " <<angle_acceleration << std::endl  <<std::endl;
 
-        showThrust(thrust_len, playerTextThrust);
+        //showThrust(thrust_len, playerTextThrust);
 
+
+        
         window.clear(sf::Color::Black);
-        window.draw(playerTextThrust);
+        
+        //window.draw(playerTextThrust);
         window.draw(sprite);
+        ImGui::SFML::Render(window);
         window.display();
     }
+    ImGui::SFML::Shutdown();
     return 0;
 }
 
