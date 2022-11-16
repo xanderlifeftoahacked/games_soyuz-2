@@ -29,14 +29,20 @@ int selectThrustFrame(float thrust)
 
 void selectRectFrame(int thrustFrame, int rotationFrame, sf::Sprite &sprite)
 {
+    static int burnTypeCounter = 0;
+    int burnType = 0;
+    if(burnTypeCounter % 10 >= 5) burnType = 1;
+    else if(burnTypeCounter % 10 < 5) burnType = 0;
+    else if(burnTypeCounter == 10) burnTypeCounter = 0;
     int oleg = RECTX * thrustFrame * 3 + RECTX * (rotationFrame - 1);
-    sprite.setTextureRect(sf::IntRect(oleg, 0, RECTX, RECTY));
+    sprite.setTextureRect(sf::IntRect(oleg, burnType == 1 ? RECTY : 0, RECTX, RECTY));
+    burnTypeCounter++;
 }
 
 int main()
 {
     sf::ContextSettings settings;
-    settings.antialiasingLevel = 4;
+    //settings.antialiasingLevel = 2;
     sf::RenderWindow window(sf::VideoMode(WINDOWS_W, WINDOWS_H), "Simulation", sf::Style::Default, settings);
     window.setVerticalSyncEnabled(true);
     window.setFramerateLimit(60);
@@ -44,7 +50,7 @@ int main()
 
     // Спрайт ракет
     sf::Texture texture;
-    texture.loadFromFile(resPath("sprites/RocketV0.png"));
+    texture.loadFromFile(resPath("sprites/RocketV01.png"));
     sf::Sprite sprite;
     sprite.setTexture(texture);
     sprite.setTextureRect(sf::IntRect(0, 0, RECTX, RECTY));
