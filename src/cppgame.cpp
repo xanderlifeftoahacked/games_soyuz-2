@@ -7,6 +7,7 @@
 #include <cmath>
 #include <gsl/gsl_linalg.h>
 #include <imgui.h>
+#include <SFML/Audio.hpp>
 #include <imgui-SFML.h>
 
 
@@ -23,6 +24,7 @@
 #define MAX_THRUST 400
 
 int deltaThrust = 1;
+int rotationFrame = 1;
 
 std::string resPath(std::string p) { return std::string(RESOURSE_PATH + p); }
 
@@ -96,6 +98,7 @@ int main()
     //sprite.scale(sf::Vector2f(0.5, 0.5));
     sprite.setPosition(window.getSize().x/2, window.getSize().y/2);
 
+  
 
 
     sf::Vector2f thrust(0, 0);
@@ -114,8 +117,11 @@ int main()
     sf::Clock deltaClockImgui;
     float dt;
 
-    
-    unsigned int rotationFrame = 0;
+    sf::SoundBuffer spacemus;
+    spacemus.loadFromFile(resPath("song1.wav"));
+    sf::Sound sound;
+    sound.setBuffer(spacemus);
+    sound.play();
 
     while (window.isOpen())
     {   
@@ -216,4 +222,3 @@ int main()
     ImGui::SFML::Shutdown();
     return 0;
 }
-
