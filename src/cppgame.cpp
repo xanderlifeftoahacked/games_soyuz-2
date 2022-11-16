@@ -32,13 +32,6 @@ void setupImgui()
     ImGuiIO& io = ImGui::GetIO();
     io.Fonts->AddFontFromFileTTF(resPath("pixls.ttf").c_str(), FONT_SIZE);
     ImGui::SFML::UpdateFontTexture();
-
-    ImGuiStyle* style = &ImGui::GetStyle();
-    style->WindowRounding = ROUNDING;
-    style->FrameRounding = ROUNDING;
-    style->PopupRounding = ROUNDING;
-    style->WindowBorderSize = BORDER;
-    style->FrameBorderSize = BORDER;
 }
 
 
