@@ -89,20 +89,20 @@ int main()
     sprite.setOrigin(RECTX/2, RECTY/2);
     //sprite.scale(sf::Vector2f(0.5, 0.5));
     sprite.setPosition(window.getSize().x/2, window.getSize().y/2);
-
-    //Земля
-    sf::Texture earthtexture;
+        sf::Texture earthtexture;
     sf::Image image;
     image.loadFromFile(resPath("/sprites/earth.png"));  
     earthtexture.loadFromImage(image);  
     sf::CircleShape earth;
-    Vector2d earthvec(-6400000, WINDOWS_W/2);
+    Vec2d earthvec(-6400000, WINDOWS_W/2);
     earth.setPosition(earthvec.x, earthvec.y);
     earth.setRadius(6400000);
     earth.setPointCount(2000);
     //earthtexture.setRepeated(true);
     earth.setTexture(&earthtexture);
     //earth.setFillColor(sf::Color::Green);
+
+  
 
 
     sf::Vector2f thrust(0, 0);
