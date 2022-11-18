@@ -9,7 +9,9 @@
 #include <cmath>
 #include <gsl/gsl_linalg.h>
 #include <imgui.h>
+#include <rocket_math.h>
 #include <imgui-SFML.h>
+#include <msg.h>
 
 
 #define FONT_SIZE 22.f
@@ -23,8 +25,6 @@
 
 int deltaThrust = 1;
 int rotationFrame = 1;
-
-std::string resPath(std::string p) { return std::string(RESOURSE_PATH + p); }
 
 
 void setupImgui()
@@ -72,6 +72,10 @@ int main()
     ImGui::SFML::Init(window, false);
     window.setVerticalSyncEnabled(true);
     window.setFramerateLimit(60);
+
+    sf::Font font;
+    font.loadFromFile(resPath("pixls.ttf"));
+
     
 
     setupImgui();
@@ -86,13 +90,25 @@ int main()
     //sprite.scale(sf::Vector2f(0.5, 0.5));
     sprite.setPosition(window.getSize().x/2, window.getSize().y/2);
 
-  
+    //Земля
+    sf::Texture earthtexture;
+    sf::Image image;
+    image.loadFromFile(resPath("/sprites/earth.png"));  
+    earthtexture.loadFromImage(image);  
+    sf::CircleShape earth;
+    Vector2d earthvec(-6400000, WINDOWS_W/2);
+    earth.setPosition(earthvec.x, earthvec.y);
+    earth.setRadius(6400000);
+    earth.setPointCount(2000);
+    //earthtexture.setRepeated(true);
+    earth.setTexture(&earthtexture);
+    //earth.setFillColor(sf::Color::Green);
 
 
     sf::Vector2f thrust(0, 0);
-    sf::Vector2f gravity(0, -1);
+    sf::Vector2f gravity(0, -100);
     sf::Vector2f total_force;
-    float mass = 10;
+    float mass = 100;
     float thrust_len = sqrt(pow(thrust.x, 2) + pow(thrust.y, 2));
     sf::Vector2f accelretion(0, 0);
     sf::Vector2f velocity(0, 0);
@@ -110,6 +126,8 @@ int main()
     sf::Sound sound;
     sound.setBuffer(spacemus);
     sound.play();
+
+    Message msg("Let's start", sf::Vector2f(WINDOWS_W / 2, WINDOWS_H / 2), sf::Color(255, 255, 255, 255), font);
 
     while (window.isOpen())
     {   
@@ -181,26 +199,31 @@ int main()
 
         sprite.setRotation(angle);
         sprite.move(velocity.x * dt + accelretion.x * pow(dt, 2) / 2, -(velocity.y * dt + accelretion.y * pow(dt, 2) / 2));
-        //view.move(velocity.x * dt + accelretion.x * pow(dt, 2) / 2, -(velocity.y * dt + accelretion.y * pow(dt, 2) / 2));
+        view.move(velocity.x * dt + accelretion.x * pow(dt, 2) / 2, -(velocity.y * dt + accelretion.y * pow(dt, 2) / 2));
         window.setView(view);
 
 
         // std::cout << "thrust " << total_force.x << " " << total_force.y << std::endl;
         // std::cout << "accel " << accelretion.x << " " << accelretion.y << std::endl;
-        // std::cout << "vel " << velocity.x << " " << velocity.y << std::endl;
+        std::cout << "vel " << velocity.x << " " << velocity.y << std::endl;
         // std::cout << angle << " " << angle_velocity << " " <<angle_acceleration << std::endl  <<std::endl;
 
-        
+
         ImGui::Begin("Info");
         ImGui::Text("asdfasdf");
         ImGui::InputFloat("thrust", &thrust_len);
         ImGui::End();
 
-        window.clear(sf::Color::Black);
+
+        window.clear(sf::Color(14, 32, 46));
         //window.draw(playerTextThrust);
         window.draw(sprite);
+        window.draw(earth);
+        msg.draw(window);
         ImGui::SFML::Render(window);
         window.display();
+
+        msg.changeAlpha(1);
     }
     ImGui::SFML::Shutdown();
     return 0;
