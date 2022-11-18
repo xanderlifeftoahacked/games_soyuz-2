@@ -185,10 +185,10 @@ int main()
         window.setView(view);
 
 
-        std::cout << "thrust " << total_force.x << " " << total_force.y << std::endl;
-        std::cout << "accel " << accelretion.x << " " << accelretion.y << std::endl;
-        std::cout << "vel " << velocity.x << " " << velocity.y << std::endl;
-        std::cout << angle << " " << angle_velocity << " " <<angle_acceleration << std::endl  <<std::endl;
+        // std::cout << "thrust " << total_force.x << " " << total_force.y << std::endl;
+        // std::cout << "accel " << accelretion.x << " " << accelretion.y << std::endl;
+        // std::cout << "vel " << velocity.x << " " << velocity.y << std::endl;
+        // std::cout << angle << " " << angle_velocity << " " <<angle_acceleration << std::endl  <<std::endl;
 
         
         ImGui::Begin("Info");
