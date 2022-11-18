@@ -86,9 +86,6 @@ int main()
     //sprite.scale(sf::Vector2f(0.5, 0.5));
     sprite.setPosition(window.getSize().x/2, window.getSize().y/2);
 
-  
-
-
     sf::Vector2f thrust(0, 0);
     sf::Vector2f gravity(0, -1);
     sf::Vector2f total_force;
