@@ -9,10 +9,12 @@
 #include <cmath>
 #include <gsl/gsl_linalg.h>
 #include <imgui.h>
-#include <rocket_math.h>
 #include <imgui-SFML.h>
-#include <msg.h>
 
+
+#include "msg.h"
+#include "utils.h"
+#include "rocket_math.h"
 
 #define FONT_SIZE 22.f
 #define ROUNDING 5.f
