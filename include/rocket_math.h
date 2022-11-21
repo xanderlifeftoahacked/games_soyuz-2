@@ -5,10 +5,8 @@
 typedef double real;
 typedef u_int64_t uint32;
 
-#ifndef PI
-#define PI 3.14159265358979323f
-#endif
-
+const real PI = 3.14159265358979323f;
+const real EPSILON = 1e-6;
 
 real degree_to_radians(real deg) { return deg * PI / 180.f; }
 
@@ -41,6 +39,8 @@ struct Vec2d
     }
     void operator-=(Vec2d v2) { x -= v2.x; y -= v2.y; }
 
+    bool operator==(Vec2d v2) { return (x == v2.x) && (y == v2.y); }
+
     // Умножение вектора на число
     Vec2d operator*(real a)
     {
@@ -53,7 +53,7 @@ struct Vec2d
     void operator*=(real a) { x *= a; y *= a; }
 
     Vec2d operator=(Vec2d v2) { x = v2.x; y = v2.y; return *this; }
-    Vec2d operator-() { x = -x; y = -y; return *this; }
+    Vec2d operator-() const { return Vec2d(-x, -y); }
 
 
 
@@ -71,7 +71,7 @@ real distance(Vec2d &v1, Vec2d &v2) { return std::sqrt(std::pow(v1.x + v2.x, 2) 
 real dot_product(Vec2d v1, Vec2d v2) { return v1.x * v2.x + v1.y * v2.y; }
 
 // Векторное произведение; возвращает длину вектора, который по сути параллелен оси z
-real cross_product(Vec2d &v1, Vec2d &v2) { return v1.x * v2.y - v1.y * v2.x; }
+real cross_product(const Vec2d &v1, const Vec2d &v2) { return v1.x * v2.y - v1.y * v2.x; }
 
 // Более экзотичные (но необходимые) виды векторных произведений
 // с вектором a и скаляром s, оба возвращают вектор
@@ -105,4 +105,12 @@ struct Mat22
 };
 
 
+bool is_equal_with_precision_up_to_epsilon(real a, real b) { return std::abs( a - b ) <= EPSILON; }
 
+
+real clamp(real min, real max, real a)
+{
+  if (a < min) return min;
+  if (a > max) return max;
+  return a;
+}
