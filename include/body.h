@@ -2,8 +2,6 @@
 #include "rocket_math.h"
 #include <vector>
 
-#define INERTIA_COUNT_PRECISION 100
-
 class Body
 {
 public:
@@ -20,11 +18,13 @@ public:
     real dynamicFriction;
     
     real inertia_moment;
+    real inv_intertia_moment;
     real angular_velocity;
 
-    Body(real _mass)
-        : mass{_mass}, inv_mass{1.0f / _mass}
+    void applyImpulse(Vec2d& impulse, Vec2d& contactVector)
     {
+        velocity += impulse * inv_mass;
+        angular_velocity += inv_intertia_moment * cross_product(contactVector, impulse );
     }
     // virtual void draw();
 };
@@ -41,14 +41,17 @@ public:
     Vec2d h_width;
     Vec2d h_height;
     const uint32 inertia_precision;
+    std::vector<Vec2d> verticies; // набор точек, принадлежащих OOBB, вершины + по три точки на ребро
 
 
     OOBB(real _width, real _height, real _mass, uint32 _inertia_precision = 100)
-        : Body(_mass), inertia_precision { _inertia_precision }
+        : inertia_precision { _inertia_precision }
     {
-        position.set(0, 0);
+        mass = _mass; inv_mass = 1.0f / _mass;
+        
         h_height.set(0, _height * 0.5f);
         h_width.set(_width * 0.5f, 0);
+        position.set(0, 0);
         count_intertia();
     }
 
@@ -61,6 +64,7 @@ public:
             for(uint32 j = 1; j <= inertia_precision; j++)
                 inertia_moment += (n1 * i + n2 * j).lenSquare() * d_mass;
         inertia_moment *= 4;
+        inv_intertia_moment = 1.0f / inertia_moment;
     }
 
 };
@@ -71,9 +75,9 @@ class Circle : public Body
 public:
     real radius;
     Circle(real _radius, real _mass)
-        : Body{_mass}
     {
+        mass = _mass; inv_mass = 1.0f / _mass;
         radius = _radius;
-        inertia_moment = radius * radius * mass;
+        inertia_moment = mass * radius * radius; inv_intertia_moment = 1.0f / inertia_moment; 
     }
 };
