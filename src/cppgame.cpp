@@ -1,6 +1,7 @@
 // первая строка кода - 15 ноября 2022 года, великое событие, отсюда берет свое начало легендарный проект, 
 // зародившийся в умах двух школьников школы "Интеллектуал", существовавшей в 2022 году
 
+
 #include "SFML/Graphics.hpp"
 #include <SFML/Audio.hpp>
 #include <SFML/System.hpp>
@@ -10,6 +11,7 @@
 #include <gsl/gsl_linalg.h>
 #include <imgui.h>
 #include <imgui-SFML.h>
+
 
 
 #include "msg.h"
@@ -66,6 +68,17 @@ void showThrust(float thrust_len, sf::Text &playerTextThrust){
 
 }
 
+void traektory(float Vy, float Vx, float g, sf::VertexBuffer& v_buffer){
+    static sf::Vertex verticies[WINDOWS_W + 1];
+    for(int x = 0; x <= WINDOWS_W; x++){
+        float y = ((Vy/Vx) * x) - (g/(2 * Vx*Vx) * x * x);
+        verticies[x].position = sf::Vector2f(-x, y);
+        verticies[x].color = sf::Color::White;
+        std::cout << x << " " << y << "\n";
+    }
+    v_buffer.update(verticies);
+}
+
 int main()
 {
     sf::ContextSettings settings;
@@ -91,10 +104,13 @@ int main()
     sprite.setOrigin(RECTX/2, RECTY/2);
     //sprite.scale(sf::Vector2f(0.5, 0.5));
     sprite.setPosition(window.getSize().x/2, window.getSize().y/2);
-        sf::Texture earthtexture;
+
+
+    sf::Texture earthtexture;
     sf::Image image;
     image.loadFromFile(resPath("/sprites/earth.png"));  
     earthtexture.loadFromImage(image);  
+
     sf::CircleShape earth;
     Vec2d earthvec(-6400000, WINDOWS_W/2);
     earth.setPosition(earthvec.x, earthvec.y);
@@ -103,6 +119,14 @@ int main()
     //earthtexture.setRepeated(true);
     earth.setTexture(&earthtexture);
     //earth.setFillColor(sf::Color::Green);
+
+    sf::CircleShape moon;
+    Vec2d moonvec(384400000, WINDOWS_W/2);
+    moon.setPosition(moonvec.x, moonvec.y);
+    moon.setRadius(1737400);
+    moon.setOrigin(earthvec.x, earthvec.y);
+    moon.setFillColor(sf::Color::White);
+
 
   
 
@@ -130,7 +154,8 @@ int main()
     sound.play();
 
     Message msg("Let's start", sf::Vector2f(WINDOWS_W / 2, WINDOWS_H / 2), sf::Color(255, 255, 255, 255), font);
-
+    sf::VertexBuffer vertices(sf::PrimitiveType::LineStrip);
+    vertices.create(WINDOWS_W + 1);
     while (window.isOpen())
     {   
         sf::Event event;
@@ -203,8 +228,7 @@ int main()
         sprite.move(velocity.x * dt + accelretion.x * pow(dt, 2) / 2, -(velocity.y * dt + accelretion.y * pow(dt, 2) / 2));
         view.move(velocity.x * dt + accelretion.x * pow(dt, 2) / 2, -(velocity.y * dt + accelretion.y * pow(dt, 2) / 2));
         window.setView(view);
-
-
+        moon.rotate(10.f);
         // std::cout << "thrust " << total_force.x << " " << total_force.y << std::endl;
         // std::cout << "accel " << accelretion.x << " " << accelretion.y << std::endl;
         std::cout << "vel " << velocity.x << " " << velocity.y << std::endl;
@@ -217,16 +241,23 @@ int main()
         ImGui::End();
 
 
+        std::cout << "Hi1\n";
+        traektory(velocity.y, velocity.x, gravity.y, vertices);
+        
         window.clear(sf::Color(14, 32, 46));
         //window.draw(playerTextThrust);
         window.draw(sprite);
         window.draw(earth);
+        window.draw(vertices);
+        window.draw(moon);
         msg.draw(window);
         ImGui::SFML::Render(window);
         window.display();
 
         msg.changeAlpha(1);
+        std::cout << "Hi2\n";
     }
     ImGui::SFML::Shutdown();
     return 0;
 }
+
