@@ -7,7 +7,7 @@ const float RECTX =  50.0f;
 const float RECTY = 126.0f;
 const real MAX_THRUST = 4000000.0f;
 const real DELTA_THRUST = 10000.0f;
-const real THRUST_DEVIATION = PI * 0.1f;
+const real THRUST_DEVIATION = PI * 0.3f;
 
 // Центр координат - центр Земли
 
@@ -19,10 +19,10 @@ class World
     sf::View view;
 public:
     World(sf::RenderWindow *_window)
-        : rocket(100.f, 30.f, 1e5, MAX_THRUST, THRUST_DEVIATION), earth(6400000.f, 10e24), window{_window}
+        : rocket(100.f, 30.f, 1e5, MAX_THRUST, THRUST_DEVIATION, Vec2d(10000000.f, 0), Vec2d(0, 40)), earth(6400000.f, 10e24), window{_window}
     {
         rocket.setTexture("sprites/RocketV01.png", RECTX, RECTY);
-        rocket.setPosition(0, earth.radius + rocket.height * 0.5f);
+        rocket.setPosition(0, earth.radius + rocket.height * 0.5f); // устанавливаем ракету на стартовую позицию
     
         earth.setTexture("sprites/earth.png");
         earth.setPosition(0, 0);
@@ -36,42 +36,39 @@ public:
     // Обработка нажатий клавиатуры
     void processKeyboard()
     {
-        
+        // Увеличение тяги
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::W))
         {
             std::cout << rocket.thrust_magnitude << "\n";
             rocket.setThrustMagnitude(rocket.thrust_magnitude + DELTA_THRUST);
         }
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::S))
         {
             rocket.setThrustMagnitude(rocket.thrust_magnitude - DELTA_THRUST);
         }
+
+        // Поворот и гиродин
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::D))
         {
             rocket.thrustRotateLeft(); rocket.setRotationFrame(2);
+            rocket.applied_force_moment += rocket.thrust.x * rocket.height * 0.5f;
         }
         else if(sf::Keyboard::isKeyPressed(sf::Keyboard::A))
         {
             rocket.thrustRotateRight(); rocket.setRotationFrame(3);
+            rocket.applied_force_moment += rocket.thrust.x * rocket.height * 0.5f;
         }
         else
         { 
             rocket.thrustSetCenter();
             rocket.setRotationFrame(1);
-            // // Имитация гиродина
-            // if(abs(angle_velocity) < 1) angle_velocity = 0;
-            // else 
-            // {
-            //     if(angle_velocity > 0)
-            //     {
-            //         angle_velocity -= angle_acceleration * dt;
-            //         angle += angle_velocity * dt - angle_acceleration * pow(dt, 2) / 2;
-            //     }
-            //     else
-            //     {                    angle_velocity += angle_acceleration * dt;
-            //         angle += angle_velocity * dt + angle_acceleration * pow(dt, 2) / 2;
-            //     }
-            // }
+            // Имитация гиродина
+            if(is_equal_with_precision_up_to_epsilon(rocket.angular_velocity, 0.f)) rocket.angular_velocity = 0.f;
+            else 
+            {
+                if(rocket.angular_velocity > 0) rocket.applied_force_moment += -rocket.gyrodine_tangent_thrust;
+                else rocket.applied_force_moment += rocket.gyrodine_tangent_thrust;
+            }
         }
     }
 
@@ -92,8 +89,8 @@ public:
         std::cout << "thrust "; rocket.thrust.print();
         std::cout << "thrust_mag " << rocket.thrust_magnitude << "\n";
         std::cout << std::endl;
-        rocket.velocity += (earth.getGravityForce(rocket.position, G_EARTH_SURFACE, rocket.mass) + rocket.thrust + rocket.applied_force) * rocket.inv_mass * dt;
-        rocket.angular_velocity += rocket.thrust.x * rocket.height * 0.5f * rocket.inv_intertia_moment * dt; // поворот вектором тяги
+        rocket.velocity += rocket.applied_force * rocket.inv_mass * dt;
+        rocket.angular_velocity += rocket.applied_force_moment * rocket.inv_intertia_moment * dt;
 
     }
 
@@ -101,9 +98,19 @@ public:
     {
         //Manifold m(&earth, &rocket);
         //if(OOBBvsCircle(&m)) m.applyImpulse();
+
+        rocket.applied_force += rocket.thrust;                                                          // тяга
+        rocket.applied_force += earth.getGravityForce(rocket.position, G_EARTH_SURFACE, rocket.mass);   // гравитация
+
         integrateForces(dt);
         integrateVelocities(dt);
         //m.positionalCorrection();
+
+        rocket.applied_force.set(0.f, 0.f);
+        rocket.applied_force_moment = 0.f;
+
+        // движение камеры за ракетой
+        view = window->getView();
         view.setCenter(rocket.position.x, -rocket.position.y);
         window->setView(view);
     }

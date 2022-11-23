@@ -6,7 +6,7 @@ typedef double real;
 typedef u_int64_t uint32;
 
 const real PI = 3.14159265358979323f;
-const real EPSILON = 1e-6;
+const real EPSILON = 1e-3;
 const real G_EARTH_SURFACE = 9.81f;
 
 real degree_to_radians(real deg);

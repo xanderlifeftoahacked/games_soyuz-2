@@ -42,6 +42,8 @@ public:
     real height, width;
     const uint32 inertia_precision;
 
+    real applied_force_moment; 
+
 
     OOBB(real _width, real _height, real _mass, uint32 _inertia_precision = 100)
         : inertia_precision { _inertia_precision }, height{_height}, width{_width}

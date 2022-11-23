@@ -23,13 +23,45 @@ public:
     Mat22 thrust_rotate_right;
     Mat22 thrust_rotate_left;
 
+    real gyrodine_tangent_thrust; // тяга, создаваемая гиродином (полностью идет во вращение)
 
-    /// \brief 
+
+    /// \brief задает основные параметры ракеты
     /// \param _thrust_angle_deviation половина угла между крайними положениями вектора тяги [радианы]
-    Rocket(real _height, real _width, real _mass,  real _max_thrust, real _thrust_angle_deviation)
+    /// \param _gyrodine_tangent_thrust ветор тяги, создаваемая гиродином
+    /// \param _gyrodine_dist_to_mc вектор от ЦМ до гиродина (гиродины будут находиться симметрично относитльно оси OY ракеты)
+    Rocket(real _height, real _width, real _mass,  real _max_thrust, real _thrust_angle_deviation, Vec2d _gyrodine_thrust, Vec2d _gyrodine_to_mc)
         : OOBB(_width, _height, _mass), max_thrust_magnitude{_max_thrust}, thrust_angle_deviation{_thrust_angle_deviation},
-            thrust_rotate_right(-_thrust_angle_deviation), thrust_rotate_left(_thrust_angle_deviation)
+            thrust_rotate_right(-2 * PI - _thrust_angle_deviation), thrust_rotate_left(_thrust_angle_deviation), 
+            gyrodine_tangent_thrust{std::abs(cross_product(_gyrodine_to_mc, _gyrodine_thrust))}
     {
+    }
+
+
+    // Установка новой длины вектора тяги (меньше max_thrust_magnitude)
+    void setThrustMagnitude(real new_thrust_magnitude) 
+    { 
+        if((new_thrust_magnitude < max_thrust_magnitude) && (new_thrust_magnitude >= 0))
+        {
+            thrust_magnitude = new_thrust_magnitude;
+            Vec2d new_thrust(0, new_thrust_magnitude);
+            if (thrust_angle < 0.f) thrust = thrust_rotate_right.rotate_vector(new_thrust);
+            if (thrust_angle > 0.f) thrust = thrust_rotate_left.rotate_vector(new_thrust);
+            else thrust = new_thrust;
+        }
+    }
+
+    void thrustRotateRight() 
+        { if(thrust_angle >= 0.f) { thrust = thrust_rotate_right.rotate_vector(thrust); thrust_angle = -thrust_angle_deviation; } }
+    void thrustRotateLeft() 
+        { if(thrust_angle <= 0.f) { thrust = thrust_rotate_left.rotate_vector(thrust); thrust_angle = thrust_angle_deviation; } }
+
+    void thrustSetCenter() { thrust = Vec2d(0, thrust_magnitude); thrust_angle = 0; }
+
+    void setPosition(real x, real y)
+    {
+        sprite.setPosition(x, -y);
+        position.set(x, y);
     }
 
     int selectThrustFrame()
@@ -65,31 +97,6 @@ public:
         sprite.setOrigin(width * 0.5f, height * 0.5f);
     }
 
-    // Установка новой длины вектора тяги (меньше max_thrust_magnitude)
-    void setThrustMagnitude(real new_thrust_magnitude) 
-    { 
-        if((new_thrust_magnitude < max_thrust_magnitude) && (new_thrust_magnitude >= 0))
-        {
-            thrust_magnitude = new_thrust_magnitude;
-            Vec2d new_thrust(0, new_thrust_magnitude);
-            if (thrust_angle < 0.f) thrust = thrust_rotate_right.rotate_vector(new_thrust);
-            if (thrust_angle > 0.f) thrust = thrust_rotate_left.rotate_vector(new_thrust);
-            else thrust = new_thrust;
-        }
-    }
-
-    void thrustRotateRight() 
-        { if(thrust_angle >= 0.f) { thrust = thrust_rotate_right.rotate_vector(thrust); thrust_angle = -thrust_angle_deviation; } }
-    void thrustRotateLeft() 
-        { if(thrust_angle <= 0.f) { thrust = thrust_rotate_left.rotate_vector(thrust); thrust_angle = thrust_angle_deviation; } }
-
-    void thrustSetCenter() { thrust = Vec2d(0, thrust_magnitude); thrust_angle = 0; }
-
-    void setPosition(real x, real y)
-    {
-        sprite.setPosition(x, -y);
-        position.set(x, y);
-    }
 
     void draw(sf::RenderWindow* window) { window->draw(sprite); }
 };
