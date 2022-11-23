@@ -13,6 +13,7 @@ class Message
         { 
             msg.setString(_msg);
             msg.setFont(font);
+            msg.setOrigin(msg.getLocalBounds().width / 2, msg.getLocalBounds().height / 2);
             msg.setPosition(pos);
             msg.setColor(col);
         }

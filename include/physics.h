@@ -24,7 +24,7 @@ public:
     void applyImpulse(Vec2d& impulse, Vec2d& contactVector)
     {
         velocity += impulse * inv_mass;
-        angular_velocity += inv_intertia_moment * cross_product(contactVector, impulse );
+        angular_velocity += inv_intertia_moment * cross_product(contactVector, impulse);
     }
     // virtual void draw();
 };
@@ -38,14 +38,13 @@ class OOBB : public Body
 {
 public:
     real rotation; //радианы
-    Vec2d h_width;
-    Vec2d h_height;
+    Vec2d h_width, h_height;
+    real height, width;
     const uint32 inertia_precision;
-    std::vector<Vec2d> verticies; // набор точек, принадлежащих OOBB, вершины + по три точки на ребро
 
 
     OOBB(real _width, real _height, real _mass, uint32 _inertia_precision = 100)
-        : inertia_precision { _inertia_precision }
+        : inertia_precision { _inertia_precision }, height{_height}, width{_width}
     {
         mass = _mass; inv_mass = 1.0f / _mass;
         
@@ -55,17 +54,7 @@ public:
         count_intertia();
     }
 
-    void count_intertia()
-    {
-        real d_mass = mass / (inertia_precision * inertia_precision);
-        Vec2d n1 = h_width * (1.0f / inertia_precision), n2 = h_height * (1.0f / inertia_precision);
-
-        for(uint32 i = 1; i <= inertia_precision; i++)
-            for(uint32 j = 1; j <= inertia_precision; j++)
-                inertia_moment += (n1 * i + n2 * j).lenSquare() * d_mass;
-        inertia_moment *= 4;
-        inv_intertia_moment = 1.0f / inertia_moment;
-    }
+    void count_intertia();
 
 };
 
@@ -81,3 +70,33 @@ public:
         inertia_moment = mass * radius * radius; inv_intertia_moment = 1.0f / inertia_moment; 
     }
 };
+
+
+struct Manifold
+{
+  Circle *circle;
+  OOBB *oobb;
+  float penetration;
+  Vec2d normal;
+  Vec2d contact_point;
+
+  real restitution;       // Смешанный коэффициент восстановления
+  real dynamic_friction;  // Смешанный коэффициент динамического трения
+  real static_friction;   // Смешанный коэффициент статического трения
+
+  Manifold(Circle *_circle, OOBB *_oobb)
+    : circle{_circle}, oobb{_oobb}
+  {
+    // Calculate average restitution
+    restitution = std::min( circle->restitution, oobb->restitution );
+
+    // Calculate static and dynamic friction
+    static_friction = std::sqrt( circle->staticFriction * oobb->staticFriction );
+    dynamic_friction = std::sqrt( circle->dynamicFriction * oobb->dynamicFriction );
+  }
+
+  void applyImpulse();
+  void positionalCorrection();
+};
+
+bool OOBBvsCircle(Manifold *m);

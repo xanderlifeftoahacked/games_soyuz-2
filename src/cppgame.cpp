@@ -1,7 +1,6 @@
 // первая строка кода - 15 ноября 2022 года, великое событие, отсюда берет свое начало легендарный проект, 
 // зародившийся в умах двух школьников школы "Интеллектуал", существовавшей в 2022 году
 
-
 #include "SFML/Graphics.hpp"
 #include <SFML/Audio.hpp>
 #include <SFML/System.hpp>
@@ -16,16 +15,13 @@
 
 #include "msg.h"
 #include "utils.h"
-#include "rocket_math.h"
+#include "world.h"
 
 #define FONT_SIZE 22.f
 #define ROUNDING 5.f
 #define BORDER 1.5f
 #define WINDOWS_W 800
 #define WINDOWS_H 600
-#define RECTX 50
-#define RECTY 126
-#define MAX_THRUST 400
 
 int deltaThrust = 1;
 int rotationFrame = 1;
@@ -38,26 +34,6 @@ void setupImgui()
     ImGui::SFML::UpdateFontTexture();
 }
 
-
-int selectThrustFrame(float thrust)
-{
-    if(thrust == 0) return 0;
-    else if(thrust > 0 && thrust <= MAX_THRUST / 4) return 1;
-    else if(thrust > MAX_THRUST / 4 && thrust <= MAX_THRUST / 2) return 2;
-    else if(thrust <= MAX_THRUST) return 3;
-}
-
-void selectRectFrame(int thrustFrame, int rotationFrame, sf::Sprite &sprite)
-{
-    static int burnTypeCounter = 0;
-    int burnType = 0;
-    if(burnTypeCounter % 10 >= 5) burnType = 1;
-    else if(burnTypeCounter % 10 < 5) burnType = 0;
-    else if(burnTypeCounter == 10) burnTypeCounter = 0;
-    int oleg = RECTX * thrustFrame * 3 + RECTX * (rotationFrame - 1);
-    sprite.setTextureRect(sf::IntRect(oleg, burnType == 1 ? RECTY : 0, RECTX, RECTY));
-    burnTypeCounter++;
-}
 
 void showThrust(float thrust_len, sf::Text &playerTextThrust){
 
@@ -91,58 +67,11 @@ int main()
     sf::Font font;
     font.loadFromFile(resPath("pixls.ttf"));
 
-    
-
     setupImgui();
 
-    // Спрайт ракет
-    sf::Texture texture;
-    texture.loadFromFile(resPath("sprites/RocketV01.png"));
-    sf::Sprite sprite;
-    sprite.setTexture(texture);
-    sprite.setTextureRect(sf::IntRect(0, 0, RECTX, RECTY));
-    sprite.setOrigin(RECTX/2, RECTY/2);
-    //sprite.scale(sf::Vector2f(0.5, 0.5));
-    sprite.setPosition(window.getSize().x/2, window.getSize().y/2);
+    World world(&window);
 
-
-    sf::Texture earthtexture;
-    sf::Image image;
-    image.loadFromFile(resPath("/sprites/earth.png"));  
-    earthtexture.loadFromImage(image);  
-
-    sf::CircleShape earth;
-    Vec2d earthvec(-6400000, WINDOWS_W/2);
-    earth.setPosition(earthvec.x, earthvec.y);
-    earth.setRadius(6400000);
-    earth.setPointCount(2000);
-    //earthtexture.setRepeated(true);
-    earth.setTexture(&earthtexture);
-    //earth.setFillColor(sf::Color::Green);
-
-    sf::CircleShape moon;
-    Vec2d moonvec(384400000, WINDOWS_W/2);
-    moon.setPosition(moonvec.x, moonvec.y);
-    moon.setRadius(1737400);
-    moon.setOrigin(earthvec.x, earthvec.y);
-    moon.setFillColor(sf::Color::White);
-
-
-  
-
-
-    sf::Vector2f thrust(0, 0);
-    sf::Vector2f gravity(0, -100);
-    sf::Vector2f total_force;
-    float mass = 100;
-    float thrust_len = sqrt(pow(thrust.x, 2) + pow(thrust.y, 2));
-    sf::Vector2f accelretion(0, 0);
-    sf::Vector2f velocity(0, 0);
-    float angle_velocity = 0;
-    float angle_acceleration = 10;
-    float angle = 0;
-
-    sf::View view = window.getDefaultView();
+    sf::View view = window.getView();
     sf::Clock deltaClock;
     sf::Clock deltaClockImgui;
     float dt;
@@ -153,7 +82,7 @@ int main()
     sound.setBuffer(spacemus);
     sound.play();
 
-    Message msg("Let's start", sf::Vector2f(WINDOWS_W / 2, WINDOWS_H / 2), sf::Color(255, 255, 255, 255), font);
+    Message msg("Let's start!", sf::Vector2f(WINDOWS_W / 2, WINDOWS_H / 2), sf::Color(255, 255, 255, 255), font);
     sf::VertexBuffer vertices(sf::PrimitiveType::LineStrip);
     vertices.create(WINDOWS_W + 1);
     while (window.isOpen())
@@ -182,80 +111,21 @@ int main()
             }
         }
 
-        dt = deltaClock.restart().asSeconds();
+        
         ImGui::SFML::Update(window, deltaClockImgui.restart());
         
+        world.processKeyboard();
+        dt = deltaClock.restart().asSeconds();
+        world.step(dt);
 
-        // Обработка нажатий клавиатуры
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)) if(thrust_len < MAX_THRUST) thrust_len += deltaThrust;
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::S)) if(thrust_len - 1 >= 0) thrust_len -= 1;
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)) 
-        { 
-            angle_velocity += angle_acceleration * dt; angle += angle_velocity * dt + angle_acceleration * pow(dt, 2) / 2;  rotationFrame = 3;
-        }
-        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)) 
-        { 
-            angle_velocity -= angle_acceleration * dt; angle += angle_velocity * dt - angle_acceleration * pow(dt, 2) / 2; rotationFrame = 2;
-        }
-        else
-        {   
-            rotationFrame = 1;
-            // Имитация гиродина
-            if(abs(angle_velocity) < 1) angle_velocity = 0;
-            else 
-            {
-                if(angle_velocity > 0)
-                {
-                    angle_velocity -= angle_acceleration * dt;
-                    angle += angle_velocity * dt - angle_acceleration * pow(dt, 2) / 2;
-                }
-                else
-                {                    angle_velocity += angle_acceleration * dt;
-                    angle += angle_velocity * dt + angle_acceleration * pow(dt, 2) / 2;
-                }
-            }
-        }
-
-        //изменение спрайта ракеты
-        selectRectFrame(selectThrustFrame(thrust_len), rotationFrame, sprite);
-        
-        thrust = sf::Vector2f(thrust_len * sin(angle * 3.14 / 180), thrust_len * cos(angle * 3.14 / 180));
-        total_force = thrust + gravity;
-        accelretion = sf::Vector2f(total_force.x / mass, total_force.y / mass);
-        velocity += accelretion * dt;
-
-        sprite.setRotation(angle);
-        sprite.move(velocity.x * dt + accelretion.x * pow(dt, 2) / 2, -(velocity.y * dt + accelretion.y * pow(dt, 2) / 2));
-        view.move(velocity.x * dt + accelretion.x * pow(dt, 2) / 2, -(velocity.y * dt + accelretion.y * pow(dt, 2) / 2));
-        window.setView(view);
-        moon.rotate(10.f);
-        // std::cout << "thrust " << total_force.x << " " << total_force.y << std::endl;
-        // std::cout << "accel " << accelretion.x << " " << accelretion.y << std::endl;
-        std::cout << "vel " << velocity.x << " " << velocity.y << std::endl;
-        // std::cout << angle << " " << angle_velocity << " " <<angle_acceleration << std::endl  <<std::endl;
-
-
-        ImGui::Begin("Info");
-        ImGui::Text("asdfasdf");
-        ImGui::InputFloat("thrust", &thrust_len);
-        ImGui::End();
-
-
-        std::cout << "Hi1\n";
-        traektory(velocity.y, velocity.x, gravity.y, vertices);
+        // traektory(velocity.y, velocity.x, gravity.y, vertices);
         
         window.clear(sf::Color(14, 32, 46));
-        //window.draw(playerTextThrust);
-        window.draw(sprite);
-        window.draw(earth);
         window.draw(vertices);
-        window.draw(moon);
+        world.render();
         msg.draw(window);
         ImGui::SFML::Render(window);
         window.display();
-
-        msg.changeAlpha(1);
-        std::cout << "Hi2\n";
     }
     ImGui::SFML::Shutdown();
     return 0;

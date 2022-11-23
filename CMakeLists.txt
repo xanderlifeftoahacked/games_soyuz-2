@@ -27,7 +27,12 @@ find_package(imgui CONFIG REQUIRED)
 find_package(GSL REQUIRED)
 
 add_executable(cppgame
-    src/cppgame.cpp)
+    src/cppgame.cpp
+    src/physics.cpp
+    src/rocket.cpp
+    src/planet.cpp
+    src/world.cpp
+    src/rocket_math.cpp)
 
 # Set include directory search paths
 target_include_directories(cppgame
