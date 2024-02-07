@@ -1,9 +1,10 @@
 cmake_minimum_required(VERSION 3.12)
 
-if(UNIX)
-set(CMAKE_TOOLCHAIN_FILE /home/xander/vcpkg/scripts/buildsystems/vcpkg.cmake
-  CACHE STRING "Vcpkg toolchain file")
-endif(UNIX)
+# not needed on GCC+Archlinux
+# if(UNIX)
+# set(CMAKE_TOOLCHAIN_FILE /home/xander/vcpkg/scripts/buildsystems/vcpkg.cmake
+#   CACHE STRING "Vcpkg toolchain file")
+# endif(UNIX)
 
 if(WIN32)
 set(CMAKE_TOOLCHAIN_FILE C:/vcp/vcpkg/scripts/buildsystems/vcpkg.cmake
